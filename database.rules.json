@@ -1,0 +1,35 @@
+{
+  "rules": {
+    "rooms": {
+      "$code": {
+        ".read": "auth != null",
+        "meta": {
+          ".write": "auth != null && (!data.exists() ? newData.child('hostId').val() === auth.uid : data.child('hostId').val() === auth.uid)"
+        },
+        "settings": { ".write": "auth != null && root.child('rooms/' + $code + '/meta/hostId').val() === auth.uid" },
+        "state":    { ".write": "auth != null && root.child('rooms/' + $code + '/meta/hostId').val() === auth.uid" },
+        "seq":      { ".write": "auth != null && root.child('rooms/' + $code + '/meta').exists()", ".validate": "newData.isNumber()" },
+        "players": {
+          ".write": "auth != null && root.child('rooms/' + $code + '/meta/hostId').val() === auth.uid",
+          "$pid": {
+            ".write": "auth != null && $pid === auth.uid && root.child('rooms/' + $code + '/meta').exists()",
+            "name":  { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 16" },
+            "photo": { ".validate": "newData.isString() && newData.val().length < 40000" }
+          }
+        },
+        "buzzes": {
+          ".write": "auth != null && root.child('rooms/' + $code + '/meta/hostId').val() === auth.uid",
+          "$round": {
+            "$pid": {
+              ".write": "auth != null && $pid === auth.uid && !data.exists() && root.child('rooms/' + $code + '/players/' + auth.uid).exists()",
+              ".validate": "newData.child('t').isNumber()"
+            }
+          }
+        },
+        "early": { "$pid": { ".write": "auth != null && $pid === auth.uid", ".validate": "newData.isNumber()" } },
+        "sync":  { "$pid": { ".write": "auth != null && $pid === auth.uid" } },
+        ".write": "auth != null && data.exists() && root.child('rooms/' + $code + '/meta/hostId').val() === auth.uid && !newData.exists()"
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" data-skin="studio">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Firstbuzz</title>
+<meta name="description" content="Fastest-finger quiz buzzer for up to 30 players. Join by QR code or room code.">
+<meta name="theme-color" content="#0D1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Firstbuzz">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Sans+Kannada:wght@500;700;800&family=Shrikhand&family=DM+Sans:wght@500;700&family=Dela+Gothic+One&family=Nunito:wght@600;800;900&family=Barlow+Condensed:ital,wght@0,600;0,800;1,800;1,900&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+</head>
+<body>
+<div class="lights" aria-hidden="true"><i></i><i></i></div>
+<main id="app"></main>
+<noscript>Firstbuzz needs JavaScript turned on.</noscript>
+<script type="module" src="js/app.js"></script>
+<script>
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+</script>
+</body>
+</html>
