@@ -1,6 +1,6 @@
 // Offline cache for the app shell. Live game data always goes to the network.
 // Bump VERSION whenever you publish changes so phones pick up the new files.
-const VERSION = 'firstbuzz-v1.0.0';
+const VERSION = 'firstbuzz-v1.0.1';
 const SHELL = [
   './', 'index.html', 'css/app.css', 'manifest.webmanifest',
   'js/app.js', 'js/config.js', 'js/net.js', 'js/i18n.js', 'js/packs.js', 'js/media.js', 'js/stage.js', 'js/ui.js', 'js/host.js', 'js/player.js',
