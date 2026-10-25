@@ -105,7 +105,7 @@ async function hostRoom(app, net, code) {
   let S = { ...DEFAULTS, ...(await net.get(R('settings')) || {}) };
   let st = await net.get(R('state')) || { phase: 'lobby', round: 0, qi: -1, scores: {} };
   st.scores = st.scores || {}; st.out = st.out || {}; st.queue = Array.isArray(st.queue) ? st.queue : Object.values(st.queue || {}); st.pos = st.pos || 0;
-  let players = {}, deck = loadDeck(), logLines = [], mode = '', stage = null, peekOpen = false, endArmed = false;
+  let players = {}, deck = loadDeck(), logLines = [], mode = '', stage = null, peekOpen = false, endArmed = false, finishArmed = false, finishTO = null;
   let pending = [], arrivals = [], decideTO = null, timeoutTO = null, armTO = null, unsubBuzz = null, seenBuzz = new Set(), earlySeen = {}, botTimers = [];
   audio.mode = S.sound; audio.enabled = ls.get('fb.hostSound', true);
   applyTheme(S); keepAwake(); net.syncClock(`rooms/${code}`);
@@ -346,7 +346,7 @@ async function hostRoom(app, net, code) {
     app.innerHTML = `<div class="view" style="display:flex;flex-direction:column;gap:14px">
       ${topbar(`<button type="button" class="btn sm" id="bRoom">${code}</button>`)}
       <div id="stageMount"></div>
-      <section class="card"><div class="privateBar"><div class="peek" id="peek"></div><div class="rowActions" id="deckActions"></div></div></section>
+      <section class="card deckCard"><div class="peek" id="peek"></div><div id="deckActions"></div></section>
       <div class="grid3">
         <section class="card"><span class="label">${t('queue')}</span><div id="queue" class="scroll"></div></section>
         <section class="card"><span class="label" id="scoreLabel"></span><div id="scores" class="scroll"></div></section>
@@ -374,9 +374,19 @@ async function hostRoom(app, net, code) {
     const q = st.q;
     $('#peek', app).innerHTML = q ? (peekOpen ? `${t('answerIs', { a: `<b>${esc(q.a)}</b>` })}${q.ref ? ` <span class="mono">${esc(q.ref)}</span>` : ''}` : `<button type="button" class="btn sm" id="dPeek">${t('peek')}</button> <span class="mono">${t('qOf', { i: st.qi + 1, n: deck.length })}</span>`) : `<span class="mono">${t('freePlay')}</span>`;
     on('dPeek', () => { peekOpen = true; renderGame(); });
-    $('#deckActions', app).innerHTML = `${q ? `<button type="button" class="btn sm" id="dReveal">${st.showAnswer ? t('hideAnswer') : t('reveal')}</button>` : ''}
-      <button type="button" class="btn sm" id="dNext">${deck.length ? t('nextQ') : t('skip')}</button><button type="button" class="btn sm" id="dFinish">${t('finish')}</button>`;
-    on('dReveal', toggleAnswer); on('dNext', nextQ); on('dFinish', finish);
+    const isLast = deck.length > 0 && st.qi + 1 >= deck.length;
+    $('#deckActions', app).innerHTML = `<div class="deckNav">
+        ${q ? `<button type="button" class="btn reveal" id="dReveal"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>${st.showAnswer ? t('hideAnswer') : t('reveal')}</button>` : ''}
+        ${isLast ? '' : `<button type="button" class="btn next" id="dNext">${deck.length ? t('nextQ') : t('skip')}<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`}
+      </div>
+      <div class="finishRow">${isLast ? `<span class="note">${t('endOfDeck')}</span>` : ''}
+        <button type="button" class="btn finish ${isLast ? 'last' : ''} ${finishArmed ? 'armed' : ''}" id="dFinish"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V3.5M5 4h11l-2.5 4L16 12H5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>${isLast ? t('seeResults') : finishArmed ? t('confirmFinish') : t('finish')}</button></div>`;
+    on('dReveal', toggleAnswer); on('dNext', nextQ);
+    on('dFinish', () => {
+      if (isLast || finishArmed) { finishArmed = false; clearTimeout(finishTO); return finish(); }
+      finishArmed = true; renderGame();
+      finishTO = setTimeout(() => { finishArmed = false; if (mode === 'game') renderGame(); }, 3000);
+    });
 
     // queue
     $('#queue', app).innerHTML = st.queue.length ? st.queue.slice(0, 12).map((e, k) => {

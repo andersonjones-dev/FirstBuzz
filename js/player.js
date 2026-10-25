@@ -1,5 +1,5 @@
 // Player phone: join a room, then become one big buzzer.
-import { t, teamName } from './i18n.js';
+import { t, teamName, quipText } from './i18n.js';
 import { MAX_PLAYERS } from './config.js';
 import { audio, unlockAudio, sfx, buzzVibe, burst, keepAwake } from './media.js';
 import { identity, embHTML, esc, svg, keyOf, entity, ranking, teamsOn, TEAM_COLORS } from './stage.js';
@@ -84,7 +84,7 @@ function playRoom(app, net, code, fresh) {
   const R = p => `rooms/${code}/${p}`;
   ls.set('fb.player', { code });
   let st = null, S = {}, players = {}, me = null, joined = false, gone = false;
-  let pressedRound = -1, lockUntil = 0, flashUntil = 0, prev = {}, lastCount = null, showWelcome = !!fresh;
+  let pressedRound = -1, lockUntil = 0, flashUntil = 0, prev = {}, lastCount = null, showWelcome = !!fresh, quipTO = null, lastQuip = null;
   net.set(R(`players/${net.uid}/online`), true); net.onDisconnect(R(`players/${net.uid}/online`), false);
   net.syncClock(`rooms/${code}`); keepAwake();
 
@@ -97,6 +97,7 @@ function playRoom(app, net, code, fresh) {
     <div class="wash" id="wash"></div>
     <div class="pbig" id="pbig"></div>
     <div id="welcome"></div>
+    <div class="pquip" id="pquip" hidden></div>
   </div><div class="conn" id="conn" hidden>${t('reconnecting')}</div>`;
   const pv = $('#pv', app), buzz = $('#buzz', app), msg = $('#pmsg', app);
   buzz.addEventListener('pointerdown', e => { e.preventDefault(); press(); });
@@ -213,6 +214,17 @@ function playRoom(app, net, code, fresh) {
         pv.classList.add('lit'); wash.style.setProperty('--w', place === 1 ? '#FFD25A' : me.color);
         pbig.innerHTML = `${embHTML(teamsOn(S) ? entity(k, players, S) : me, 'wemb')}<div class="nm">#${place}</div><div class="sub">${t('place', { n: place })} · ${t('pts', { n: sc })}</div>`;
       } else pbig.innerHTML = '';
+    }
+
+    // quips: shown on every phone, each in its own language
+    if (st.quip && st.quip.at !== lastQuip) {
+      lastQuip = st.quip.at;
+      if (S.quips !== false && now - st.quip.at < 5000) {
+        const qEl = $('#pquip', app);
+        qEl.textContent = quipText(st.quip.k, st.quip.i || 0, st.quip.v || {});
+        qEl.hidden = false; qEl.classList.remove('pop'); void qEl.offsetWidth; qEl.classList.add('pop');
+        clearTimeout(quipTO); quipTO = setTimeout(() => { qEl.hidden = true; }, 4500);
+      }
     }
 
     // one-shot effects
