@@ -8,12 +8,12 @@
  *
  * The app always opens from the saved copy, so it works with no internet.
  */
-const VERSION = 'firstbuzz-v1.0.3';
+const VERSION = 'firstbuzz-v1.0.4';
 const PREFIX = 'firstbuzz-';   // only caches starting with this are ever deleted: other apps share this storage
 const LIB = 'firstbuzz-lib';         // fonts and libraries from other sites, kept between versions
 const KEEP = [];
 const CORE = [
-  './', 'index.html', 'update.js', 'css/app.css', 'manifest.webmanifest',
+  './', 'index.html', 'update.js', 'about.js', 'css/app.css', 'manifest.webmanifest',
   'js/app.js', 'js/config.js', 'js/net.js', 'js/i18n.js', 'js/packs.js', 'js/media.js',
   'js/stage.js', 'js/ui.js', 'js/host.js', 'js/player.js',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'

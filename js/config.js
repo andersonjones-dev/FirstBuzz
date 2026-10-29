@@ -16,4 +16,4 @@ export const FIREBASE_CONFIG = {
 
 export const PUBLIC_URL = 'https://firstbuzz.pages.dev/';
 export const MAX_PLAYERS = 30;
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '1.0.4';

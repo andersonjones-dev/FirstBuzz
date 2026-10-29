@@ -41,6 +41,7 @@ function landing(net) {
         <button class="btn primary" type="submit">${t('join')}</button></form>
     </div>
     <p class="note center" style="margin:0 auto">v${APP_VERSION}</p>
+    <button type="button" class="abt-link" data-about-open style="margin-top:-12px">&copy; 2026 Anderson Jones &middot; About</button>
   </div>`;
   bindLang(app, () => landing(net));
   $('#knob', app).onclick = () => { unlockAudio(); audio.mode = 'funny'; import('./media.js').then(m => m.sfx('press', 392 + Math.random() * 300)); };
